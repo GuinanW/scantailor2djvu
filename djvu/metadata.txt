@@ -1,0 +1,9 @@
+(metadata
+  (author "автор")
+  (title  "название")
+  (year   "2016")
+  (pages  "310")
+  (isbn   "978-5-*")
+  (text   "ocr, outline, links")
+  (language "ru")
+)

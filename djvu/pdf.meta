@@ -1,0 +1,59 @@
+InfoKey: Title
+InfoValue: Название
+
+InfoKey: Author
+InfoValue: Автор
+
+InfoKey: Producer
+InfoValue: Pdf Creator
+
+InfoKey: ModDate
+InfoValue: D:20160101000000Z
+InfoKey: CreationDate
+InfoValue: D:20160101000000Z
+
+
+BookmarkBegin
+BookmarkTitle: Оглавление
+BookmarkLevel: 2
+BookmarkPageNumber: 3
+
+BookmarkBegin
+BookmarkTitle: Предисловие
+BookmarkLevel: 2
+BookmarkPageNumber: 14
+
+BookmarkBegin
+BookmarkTitle: Глава 1. 
+BookmarkLevel: 2
+BookmarkPageNumber: 16
+
+BookmarkBegin
+BookmarkTitle: Глава 1.1
+BookmarkLevel: 2
+BookmarkPageNumber: 16
+
+BookmarkBegin
+BookmarkTitle: Глава 1.1.1
+BookmarkLevel: 2
+BookmarkPageNumber: 16
+
+BookmarkBegin
+BookmarkTitle: Глава 1.1.2
+BookmarkLevel: 2
+BookmarkPageNumber: 17
+
+BookmarkBegin
+BookmarkTitle: Глава 1.1.3
+BookmarkLevel: 2
+BookmarkPageNumber: 19
+
+BookmarkBegin
+BookmarkTitle: Глава 1.2
+BookmarkLevel: 2
+BookmarkPageNumber: 20
+
+BookmarkBegin
+BookmarkTitle: Глава 2.
+BookmarkLevel: 2
+BookmarkPageNumber: 22
