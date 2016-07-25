@@ -1,11 +1,10 @@
-#!/bin/bash
-
+#!/bin/bash -x
 #конвертируем почищенные картинки в djvu
 
-#уменьшаем картинку, чтоб размер был меньше
-#важно чтоб размер картинки с учётом dpi был больше картинки с текстом
-scale="-geometry 50%x"
-out_dpi=300
+#во сколько раз уменьшить картинку, чтоб размер был меньше
+scale_factor=3
+#соразмерно уменьшаем dpi
+out_dpi=`expr 600 / ${scale_factor}`
 
 mkdir djvu
 for f in *.tif;do
@@ -13,6 +12,7 @@ for f in *.tif;do
     tmp_ppm=`mktemp --suffix '.ppm'`
 
     cmd=""
+    scale=`identify -format "-geometry %[fx:ceil(w/${scale_factor})]x%[fx:ceil(h/${scale_factor})]" "${f}"`
     #подложка с номером
     #[ -f "../2.pics/${f}" ] && cmd="${cmd} -page +0+0 ../2.pics/${f} " #pic_file
 
