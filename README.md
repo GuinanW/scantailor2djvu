@@ -17,3 +17,4 @@
   1. Прописать метаданные (djvu/metadata.txt) и содержание (djvu/bookmark.txt) и для pdf - pdf_meta.txt
   1. Собрать окончательные версии скриптами djvu/merge_djvu.sh и djvu/merge_pdf.sh
 
+В out/export/special есть набор специфичных скриптов
