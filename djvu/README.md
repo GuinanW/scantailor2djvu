@@ -1,6 +1,6 @@
 Окончательная сборка djvu и pdf
 
-== Обработка djvu ==
+## Обработка djvu
 
 1. Заполняем metadata.txt в соответствии с реквизитами книги
 1. Копируем распознанное содержание из FineReader в виде текста в content.txt
@@ -9,7 +9,8 @@
     созданные bookmark.txt.new проверить и переименовать в bookmark.txt
 1. собираем `./merge_djvu.sh`
 
-== Обработка pdf ==
+
+## Обработка pdf
 
 1. Извлекаем метаинформацию о pdf
     `pdftk pdf_fr.pdf dump_data_utf8 output pdf_meta.txt`
