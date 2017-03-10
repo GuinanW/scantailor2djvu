@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 #конвертируем почищенные картинки в djvu
 
 #во сколько раз уменьшить картинку, чтоб размер был меньше
@@ -7,12 +7,19 @@ scale_factor=3
 out_dpi=`expr 600 / ${scale_factor}`
 
 mkdir djvu
+
+#подтягиваем пустые страницы для меток
+for f in ../mark/*.png;do
+    bf=`basename "${f%%.png}"`
+    [ -f "../2/${bf}" -a ! -f "${bf}" ] && cp -vf "../2/${bf}" ${bf}
+done
+
 for f in *.tif;do
     echo "${f}"
     tmp_ppm=`mktemp --suffix '.ppm'`
 
     cmd=""
-    scale=`identify -format "-geometry %[fx:ceil(w/${scale_factor})]x%[fx:ceil(h/${scale_factor})]" "${f}"`
+    scale=`identify -format "-geometry %[fx:ceil(w/${scale_factor})]x%[fx:ceil(h/${scale_factor})] " "${f}"`
     #подложка с номером
     #[ -f "../2.pics/${f}" ] && cmd="${cmd} -page +0+0 ../2.pics/${f} " #pic_file
 
