@@ -17,8 +17,10 @@ print cv2.__version__
 FLANN_INDEX_KDTREE = 1
 flann_params = dict(algorithm = FLANN_INDEX_KDTREE,
                     trees = 5)
+__features__cached__ = {}
 
 def drawKeyPoints(img, template, skp, tkp, num=-1, z=0):
+    "Отрисовываем связи между характерными точками для проверки"
     h1, w1 = img.shape[:2]
     h2, w2 = template.shape[:2]
     nWidth = w1+w2
@@ -46,16 +48,25 @@ def match_flann(desc1, desc2, r_threshold = 0.6):
     pairs = numpy.int32( zip(idx1, idx2[:,0]) )
     return pairs[mask]
 
-def get_different(img1, img2):
-    #img1 = template
-    r_threshold = 0.6
+def get_features(img1):
+    "Ищем характерные точки"
     detector = cv2.FeatureDetector_create('SIFT')
     descriptor = cv2.DescriptorExtractor_create('SIFT')
 
-    kp1 = detector.detect(img1)
-    kp1, desc1 = descriptor.compute(img1, kp1)
-    kp2 = detector.detect(img2)
-    kp2, desc2 = descriptor.compute(img2, kp2)
+    kp = detector.detect(img1)
+    kp, desc = descriptor.compute(img1, kp)
+    return (kp, desc)
+
+def get_different(img1, img2):
+    kp1, desc1 = get_features(img1)
+    kp2, desc2 = get_features(img2)
+    return get_homography((kp1, desc1), (kp2, desc2))
+
+def get_homography((kp1, desc1), (kp2, desc2)):
+    "Определяем параметры для гомографического преобразования"
+    #img1 = template
+    r_threshold = 0.6
+
     print 'img1 - %d features, img2 - %d features' % (len(kp1), len(kp2))
 
     res = {}
@@ -86,12 +97,12 @@ def fix_pages(
             img_path, #где ищем
             img_small_path, #что ищем
             out_path, #куда сохраняем
-            small_factor = 2, #уменьшаем изображения, чтоб памяти меньше жрало
-            bad_factor = 1e-5 #предел искривления для отбраковки картинки
+            small_factor = 2, #коэффициент уменьшения изображения, чтоб памяти меньше жрало
+            bad_factor = 1e-4 #предел искривления для отбраковки картинки
             ):
     "Пытаемся вклеить другую картинку"
     #orig_img = cv2.imread(img_path)
-    print "test: %s vs %s" % (img_path, img_small_path)
+    print "test: %s vs %s" % (img_small_path, img_path)
 
     small_img = cv2.imread(img_small_path)
     
@@ -105,16 +116,23 @@ def fix_pages(
 
     #пытаемся найти параметры преобразования
     try: 
-        diff_homo = get_different(array_tmpl, cv2.resize(array_img, (w/small_factor, h/small_factor)))
+        if not img_path in __features__cached__:
+            __features__cached__[img_path] = get_features( cv2.resize(array_img, (w/small_factor, h/small_factor)) )
+        if not img_small_path in __features__cached__:
+            __features__cached__[img_small_path] = get_features( array_tmpl )
+
+        diff_homo = get_homography(__features__cached__[img_small_path], __features__cached__[img_path])
+        #diff_homo = get_different(array_tmpl, cv2.resize(array_img, (w/small_factor, h/small_factor)))
     except:
         print sys.exc_info()[1]
         return None
 
     #проверка на слишком большое искривление
-    if abs(diff_homo[2,0]) > bad_factor or (abs(diff_homo[2,1])) > bad_factor:
+    #print '?', diff_homo
+    if abs(diff_homo[2,0]) > bad_factor or (abs(diff_homo[2,1])) > bad_factor or (abs(diff_homo[2,2] - 1))>0.2:
         return None
     
-    print img_path, img_small_path, diff_homo
+    print img_path, img_small_path, '\n', diff_homo
     #преобразуем изображение
     try:
         dst = cv2.warpPerspective(small_img, diff_homo, (w/small_factor, h/small_factor), 
@@ -129,11 +147,13 @@ def fix_pages(
 if __name__ == "__main__":
     import optparse
     
-    parser = optparse.OptionParser("usage: %prog <файлы, которые вклеивать>")
+    parser = optparse.OptionParser(u"usage: %prog <файлы, которые вклеивать>")
     parser.add_option("-d", "--from-dir", dest="from_dir", type="string", 
                       default=".", help=u'каталог в котором искать оригинальные страницы')
-    parser.add_option("-o", "--out-dir", dest="from_dir", type="string", 
+    parser.add_option("-o", "--out-dir", dest="out_dir", type="string", 
                       default="fix_pages", help=u'каталог в который складывать обработанные изображения')
+    parser.add_option("--all", dest="all", action="store_true", 
+                      default=False, help=u'сравниваются картинки все со всеми')
     parser.add_option("-n", "--diff-num", dest="diff_num", type="int", 
                       default=10, help=u'в пределах скольки страниц искать подобие')
 
@@ -148,16 +168,31 @@ if __name__ == "__main__":
 
     print test_files
 
-    if not os.path.isdir('fix_pages'): os.makedirs('fix_pages')
-    for inf in infiles:
-        inf_basename = os.path.basename(inf)
-        try:
-            #ищем номер страницы
-            inf_num = int(re.match('^-?([0-9]+)', inf_basename).groups()[0])
-        except: 
-            continue
+    if not os.path.isdir(options.out_dir): os.makedirs(options.out_dir)
+    
+    if options.all:
+        #перебор всех со всеми
+        for name in sorted(os.listdir(options.from_dir)):
+            fn = os.path.join(options.from_dir, name)
+            if os.path.islink(fn):
+                fn = os.readlink(fn)
+            if not os.path.isfile(fn): continue
+            
+            for inf in sorted(infiles):
+                inf_basename = os.path.basename(inf)
+                outname = '%s/%s-%s.png' % (options.out_dir, os.path.basename(fn), inf_basename)
+                fix_pages(fn, inf, outname)
+    else:
+        #сравниваем ищем картинку в пределах +- options.diff_num страниц
+        for inf in infiles:
+            inf_basename = os.path.basename(inf)
+            try:
+                #ищем номер страницы
+                inf_num = int(re.match('^-?([0-9]+)', inf_basename).groups()[0])
+            except: 
+                continue
 
-        #ищем подобие на страницам с номерами в пределах +/- options.diff_num
-        for page_num in xrange( inf_num - options.diff_num, inf_num + options.diff_num ):
-            if page_num not in test_files: continue
-            fix_pages(test_files[page_num], inf, 'fix_pages/%.4i-%s.png' % (page_num, inf_basename))
+            #ищем подобие на страницам с номерами в пределах +/- options.diff_num
+            for page_num in xrange( inf_num - options.diff_num, inf_num + options.diff_num ):
+                if page_num not in test_files: continue
+                fix_pages(test_files[page_num], inf, '%s/%.4i-%s.png' % (options.out_dir, page_num, inf_basename))
