@@ -2,6 +2,7 @@
 #сборка конечного djvu
 
 out_file="book.djvu"
+#out_file="/dev/shm/book.djvu"
 diff_page=1 #разница нумераций
 
 cp -vf out.djvu "${out_file}"

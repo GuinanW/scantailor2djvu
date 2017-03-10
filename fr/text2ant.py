@@ -51,7 +51,7 @@ def generate_ant(fn, out_fn, diff_page=0):
 if __name__ == '__main__':
     parser = optparse.OptionParser("usage: %prog <файлы txt>")
 
-    parser.add_option("-n", dest="diff_page", 
+    parser.add_option("-n", dest="diff_page", type=int,
                       default=1, help=u'сколько страниц прибавлять для djvu')
 
     (options, args) = parser.parse_args()
