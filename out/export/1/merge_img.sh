@@ -22,7 +22,7 @@ for text_file in *.tif;do
     [ -f "../mark/${text_file}.png" ] && cmd="${cmd} -page +0+0 ../mark/${text_file}.png " #mark_file
 
     #текст
-    [ -f "${text_file}" ] && cmd="${cmd} -page +0+0 ( ${text_file} -transparent #ffffff )"
+    [ -f "${text_file}" ] && cmd="${cmd} -page +0+0 ( ${text_file} -transparent #ffffff ) "
 
     echo "${cmd}"
     convert ${cmd} -background "#ffffff" -layers merge +repage "${out_dir}/${text_file}.png"

@@ -20,7 +20,7 @@ def replace_num_pages(fn, diff_page=1):
         outfile.write(st)
 
 if __name__ == '__main__':
-    parser = optparse.OptionParser("usage: %prog <raster>")
+    parser = optparse.OptionParser("usage: %prog <bookmark.txt>")
 
     parser.add_option("-n", dest="diff_page", type=int,
                       default=1, help=u'сколько страниц прибавлять для djvu')

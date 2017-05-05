@@ -19,7 +19,7 @@ for f in *.tif;do
     tmp_ppm=`mktemp --suffix '.ppm'`
 
     cmd=""
-    scale=`identify -format "-geometry %[fx:ceil(w/${scale_factor})]x%[fx:ceil(h/${scale_factor})] " "${f}"`
+    scale=`identify -format "-geometry %[fx:ceil(w/${scale_factor})]x%[fx:ceil(h/${scale_factor})]! " "${f}"`
     #подложка с номером
     #[ -f "../2.pics/${f}" ] && cmd="${cmd} -page +0+0 ../2.pics/${f} " #pic_file
 
