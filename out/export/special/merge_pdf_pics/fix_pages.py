@@ -98,7 +98,8 @@ def fix_pages(
             img_small_path, #что ищем
             out_path, #куда сохраняем
             small_factor = 2, #коэффициент уменьшения изображения, чтоб памяти меньше жрало
-            bad_factor = 1e-4 #предел искривления для отбраковки картинки
+            bad_factor = 1e-4, #предел искривления для отбраковки картинки
+            round_homography = ['homo', ] #отбрасывание лишнего от гомографии
             ):
     "Пытаемся вклеить другую картинку"
     #orig_img = cv2.imread(img_path)
@@ -134,14 +135,34 @@ def fix_pages(
     
     print img_path, img_small_path, '\n', diff_homo
     #преобразуем изображение
-    try:
-        dst = cv2.warpPerspective(small_img, diff_homo, (w/small_factor, h/small_factor), 
-                flags = cv2.INTER_NEAREST
-                )# [, dst[, flags[, borderMode[, borderValue]]]]) → dst¶
-        dst = cv2.resize(dst, (w,h), interpolation=cv2.INTER_NEAREST)
-        cv2.imwrite(out_path, dst)
-    except:
-        pass
+
+
+    #type_resize = cv2.INTER_NEAREST
+    type_resize = cv2.INTER_CUBIC
+
+    round_homo_methods = ['homo', 'affine', 'resize']
+
+    for round_homo_method in round_homography:
+        if round_homo_method not in round_homo_methods: continue
+        new_homo = diff_homo.copy()
+
+        if round_homo_method == 'affine':
+            new_homo[2] = [0,0,1]
+        elif round_homo_method == 'resize':
+            new_homo[2] = [0,0,1]
+            new_homo[0,1] = 0
+            new_homo[1,0] = 0
+        try:
+            dst = cv2.warpPerspective(small_img, new_homo, (w/small_factor, h/small_factor), 
+                    flags = type_resize,
+                    borderMode = cv2.BORDER_CONSTANT,
+                    borderValue = [255,255,255,0]
+                    )# [, dst[, flags[, borderMode[, borderValue]]]]) → dst¶
+            dst = cv2.resize(dst, (w,h), interpolation=type_resize)
+            cv2.imwrite(out_path.replace('.png', '_%s.png' % (round_homo_method, ), 1), dst)
+        except:
+            print sys.exc_info()[1]
+            pass
     return ''
     
 if __name__ == "__main__":
@@ -156,6 +177,8 @@ if __name__ == "__main__":
                       default=False, help=u'сравниваются картинки все со всеми')
     parser.add_option("-n", "--diff-num", dest="diff_num", type="int", 
                       default=10, help=u'в пределах скольки страниц искать подобие')
+    parser.add_option("--round-homo", dest="round_homo", 
+                      default='homo', help=u'округление параметров гомографии (homo,affine,resize)')
 
     (options, infiles) = parser.parse_args()
     
@@ -181,7 +204,7 @@ if __name__ == "__main__":
             for inf in sorted(infiles):
                 inf_basename = os.path.basename(inf)
                 outname = '%s/%s-%s.png' % (options.out_dir, os.path.basename(fn), inf_basename)
-                fix_pages(fn, inf, outname)
+                fix_pages(fn, inf, outname, round_homography=options.round_homo.split(','))
     else:
         #сравниваем ищем картинку в пределах +- options.diff_num страниц
         for inf in infiles:
@@ -195,4 +218,6 @@ if __name__ == "__main__":
             #ищем подобие на страницам с номерами в пределах +/- options.diff_num
             for page_num in xrange( inf_num - options.diff_num, inf_num + options.diff_num ):
                 if page_num not in test_files: continue
-                fix_pages(test_files[page_num], inf, '%s/%.4i-%s.png' % (options.out_dir, page_num, inf_basename))
+                fix_pages(test_files[page_num], inf, '%s/%.4i-%s.png' % (options.out_dir, page_num, inf_basename),
+                            round_homography=options.round_homo.split(',')
+                            )
