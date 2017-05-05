@@ -18,17 +18,21 @@
 
     ;уровни
     (gimp-levels drawable 0 40 230 1.0 0 255)
+
+    ;гауссово размытие
+    ;(plug-in-gauss RUN-NONINTERACTIVE image drawable 3 3 1)
+
     ;выборочное гауссово размытие
     (plug-in-sel-gauss RUN-NONINTERACTIVE image drawable 4 75)
 
     ;подчистка после размытия
-    (gimp-levels drawable 0 0 250 1.0 0 255)
+    (gimp-levels drawable 0 5 250 1.0 0 255)
 
     ; автоконтраст
-    ;(gimp-levels-stretch drawable)
+    (plug-in-c-astretch RUN-NONINTERACTIVE image drawable)
     
     ; нерезкая маска
-    (plug-in-unsharp-mask RUN-NONINTERACTIVE image drawable 5.0 0.5 0)
+    ;(plug-in-unsharp-mask RUN-NONINTERACTIVE image drawable 5.0 0.5 0)
 
     (gimp-displays-flush)
     (set! drawable (car (gimp-image-get-active-layer image)))
