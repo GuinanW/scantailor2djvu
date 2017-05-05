@@ -3,7 +3,8 @@
 Зависимости: minidjvu, djvulibre, imagemagick
 
 Порядок обработки:
-  1. Сделать в ScanTailor все что надо
+  1. Проверяем скриптом z_test.sh, что все страницы отсканированы
+  1. Обрабатываем в ScanTailor
   1. Произвести экспорт из ScanTailor в виде раздельных сканов (ветка [featured] (https://github.com/scantailor/scantailor/tree/featured)) либо пройти скриптом out/_split.sh
   1. Отобрать файлы с картинками, где есть изображения - скрипт out/export/2/mv_pics_img.sh
   1. Перекинуть картинки из out/export/2/img в out/export/img_clean и почистить gimp или прочим
