@@ -3,12 +3,15 @@
 
 mkdir -p "export/1" "export/2"
 
-i=1 #счётчик номера страницы
+i=0 #счётчик номера страницы
 
 for f in *.tif;do
-    #of="${f}" #с оригинальными именами
+    i=`expr ${i} + 1`
     of=`printf "%04d.tif" ${i}` #перенумеровываем файлы по порядку в вид "0000.tif"
+    #of="${f}" #с оригинальными именами
+
+    #[ "export/1/${of}" -nt "${f}" ] && continue #пропускаем если есть чб новее
+    echo "${f} -> ${of}"
     convert "${f}" -threshold 1 -monochrome -compress lzw "export/1/${of}"
     convert "${f}" -mask "export/1/${of}" -fill white -opaque black +mask -compress lzw "export/2/${of}"
-    i=`expr ${i} + 1`
 done
