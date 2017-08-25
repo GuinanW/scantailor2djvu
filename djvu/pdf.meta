@@ -1,14 +1,19 @@
+InfoBegin
 InfoKey: Title
 InfoValue: Название
 
+InfoBegin
 InfoKey: Author
 InfoValue: Автор
 
+InfoBegin
 InfoKey: Producer
 InfoValue: Pdf Creator
 
+InfoBegin
 InfoKey: ModDate
 InfoValue: D:20160101000000Z
+InfoBegin
 InfoKey: CreationDate
 InfoValue: D:20160101000000Z
 
